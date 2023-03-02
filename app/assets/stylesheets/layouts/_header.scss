@@ -7,9 +7,7 @@
   margin-bottom: var(--space-l);
 
   h1 {
-    font-size: var(--font-size-xxxl);
-    line-height: var(--line-height-headers);
-    color: var(--color-text-header);
+    font-size: clamp(var(--font-size-xxl), 4vw, var(--font-size-xxxxl));
   }
 
   &__subtitle {

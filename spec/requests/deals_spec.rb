@@ -14,6 +14,16 @@ RSpec.describe 'Deals' do
       expect(response.body).not_to include('No deals in the pipeline yet')
     end
 
+    it 'renders a real table with a header cell for every column' do
+      create(:deal, :staged, stages: %w[Lead])
+
+      get deals_path
+
+      table = response.parsed_body.at_css('table.data-table')
+      expect(table.css('thead th[scope="col"]').size).to eq(6)
+      expect(table.css('tbody tr td').size).to eq(6)
+    end
+
     it 'shows the empty state only when there really are no deals' do
       get deals_path
       expect(response.body).to include('No deals in the pipeline yet')
@@ -24,7 +34,7 @@ RSpec.describe 'Deals' do
 
       get deals_path
 
-      expect(response.body.scan('class="table table--deals"').size).to eq(DealsController::PER_PAGE)
+      expect(response.body.scan('class="data-table__row"').size).to eq(DealsController::PER_PAGE)
     end
   end
 

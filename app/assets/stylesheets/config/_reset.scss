@@ -46,7 +46,10 @@ h4,
 h5,
 h6 {
   color: var(--color-text-header);
+  font-family: var(--font-family-display);
+  font-weight: 800;
   line-height: var(--line-height-headers);
+  letter-spacing: -0.01em;
 }
 
 h1 {
@@ -71,15 +74,45 @@ a {
   transition: color 200ms;
 
   &:hover,
-  &:focus,
   &:active {
-    color: var(--color-primary-rotate);
+    color: var(--color-primary-hover);
+    text-decoration: underline;
   }
 }
 
 // Visible keyboard focus everywhere, including on the gradient buttons which
 // clear their own outline.
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: solid 3px var(--color-glint);
+  outline: solid 3px var(--color-focus);
   outline-offset: 2px;
+}
+
+#main:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-xs);
+  left: var(--space-xs);
+  z-index: 10;
+  padding: var(--space-xs) var(--space-m);
+  border-radius: var(--border-radius);
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  transform: translateY(-200%);
+
+  &:focus {
+    transform: none;
+    color: var(--color-white);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

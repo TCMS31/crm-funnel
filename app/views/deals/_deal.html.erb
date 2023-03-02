@@ -1,15 +1,11 @@
-<div class="table table--deals">
-  <p><%= f_item deal.user&.full_name %></p>
-  <p class="table__muted"><%= f_item deal.user&.email %></p>
-  <p><%= stage_badge deal.current_deal_stage %></p>
-  <p><%= f_item deal.company&.name %></p>
-  <p class="table__numeric"><%= deal.probability %>%</p>
-
-  <div class="table__actions">
-    <% if cta %>
-      <%= link_to "Move stage", new_deal_history_path(deal), class: "btn btn--primary" %>
-    <% else %>
-      <%= link_to "Details", deal_path(deal), class: "btn btn--light" %>
-    <% end %>
-  </div>
-</div>
+<tr class="data-table__row">
+  <td data-label="Contact"><%= link_to f_item(deal.user&.full_name), deal_path(deal) %></td>
+  <td data-label="Email" class="data-table__muted data-table__wide"><%= f_item deal.user&.email %></td>
+  <td data-label="Stage"><%= stage_badge deal.current_deal_stage %></td>
+  <td data-label="Company"><%= f_item deal.company&.name %></td>
+  <td data-label="Probability" class="data-table__numeric"><%= deal.probability %>%</td>
+  <td class="data-table__actions">
+    <%= link_to "Move stage", new_deal_history_path(deal), class: "btn btn--light",
+                aria: { label: "Move stage for #{deal.user&.full_name || "deal #{deal.id}"}" } %>
+  </td>
+</tr>

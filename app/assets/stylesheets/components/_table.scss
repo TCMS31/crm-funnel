@@ -1,48 +1,39 @@
-// A single grid definition drives both the header row and the record rows, so
-// columns line up without every partial repeating widths.
-.table {
-  display: grid;
-  gap: var(--space-m);
-  align-items: center;
-  padding: var(--space-s) var(--space-m);
-  border-bottom: var(--border);
-  background-color: var(--color-white);
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-s);
 
-  &:last-of-type {
-    border-bottom: 0;
-  }
-
-  &--head {
-    background-color: hsl(220, 30%, 98%);
-    border-bottom: solid 2px var(--color-light);
-    font-size: var(--font-size-xs);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-
-  &--deals    { grid-template-columns: 1.3fr 1.9fr 6.5rem 1.2fr 6rem auto; }
-  &--users    { grid-template-columns: 1.4fr 2.2fr 1.2fr 1.2fr auto; }
-  &--companies{ grid-template-columns: 2fr 1fr 1fr auto; }
-  &--history  { grid-template-columns: 8rem 1fr; }
-  &--moves    { grid-template-columns: 1.4fr 1.4fr 7rem 9rem; }
-
-  p, h2 {
-    margin: 0;
-    min-width: 0;
-    font-size: inherit;
-    font-weight: inherit;
+  th,
+  td {
+    padding: var(--space-s) var(--space-m);
+    text-align: left;
+    vertical-align: middle;
     overflow-wrap: anywhere;
   }
 
-  &__actions {
-    display: flex;
-    gap: var(--space-xs);
-    justify-content: flex-end;
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--color-surface-alt);
+    border-bottom: solid 2px var(--color-light);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  &__row {
+    border-bottom: var(--border);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background-color: var(--color-surface-alt);
+    }
   }
 
   &__muted {
@@ -51,19 +42,86 @@
 
   &__numeric {
     font-variant-numeric: tabular-nums;
-    text-align: right;
+    text-align: right !important;
+  }
+
+  &__actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right !important;
+
+    > * {
+      display: inline-flex;
+      margin-left: var(--space-xxs);
+    }
+  }
+
+  // Narrow screens: each row becomes a labelled card, so nothing scrolls
+  // sideways and every value keeps its column name.
+  @media (max-width: 48rem) {
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    tbody tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xxs) var(--space-m);
+      padding: var(--space-s) var(--space-m);
+    }
+
+    td {
+      display: block;
+      padding: 0;
+    }
+
+    td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-size: var(--font-size-xs);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    &__numeric {
+      text-align: left !important;
+    }
+
+    &__wide {
+      grid-column: 1 / -1;
+    }
+
+    &__actions {
+      grid-column: 1 / -1;
+      width: auto;
+      text-align: left !important;
+      padding-top: var(--space-xxs) !important;
+
+      > * {
+        margin: 0 var(--space-xxs) 0 0;
+      }
+    }
   }
 }
 
 .card {
-  background-color: var(--color-white);
   border: var(--border);
   border-radius: var(--border-radius);
+  background-color: var(--color-white);
   box-shadow: var(--shadow-small);
   overflow: hidden;
 
+  &--spaced {
+    margin-top: var(--space-xl);
+  }
+
   &__title {
-    margin: 0;
     padding: var(--space-m);
     border-bottom: var(--border);
     font-size: var(--font-size-l);
@@ -82,14 +140,17 @@
   padding: var(--space-m) 0;
   font-size: var(--font-size-s);
 
-  a, em, span {
+  a,
+  em,
+  span {
     padding: var(--space-xxs) var(--space-xs);
     border-radius: var(--border-radius);
-    text-decoration: none;
     color: var(--color-text-body);
+    text-decoration: none;
   }
 
-  em {
+  em,
+  .current {
     background-color: var(--color-primary);
     color: var(--color-white);
     font-style: normal;

@@ -19,13 +19,20 @@
     <%= render "companies/empty_state" %>
   <% else %>
     <div class="card">
-      <div class="table table--companies table--head">
-        <h2>Name</h2>
-        <h2 class="table__numeric">Contacts</h2>
-        <h2 class="table__numeric">Deals</h2>
-        <h2></h2>
-      </div>
-      <%= render @companies %>
+      <table class="data-table data-table--companies">
+        <caption class="visually-hidden">Companies, newest first</caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col" class="data-table__numeric">Contacts</th>
+            <th scope="col" class="data-table__numeric">Deals</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= render @companies %>
+        </tbody>
+      </table>
     </div>
     <%= paginate @companies %>
   <% end %>

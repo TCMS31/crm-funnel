@@ -14,12 +14,8 @@
   text-decoration: none;
 
   &:hover { color: var(--color-primary); }
-}
 
-.section-title {
-  margin: var(--space-xl) 0 var(--space-m);
-  font-size: var(--font-size-xl);
-  color: var(--color-text-header);
+  &:focus-visible { color: var(--color-primary); }
 }
 
 .muted {
@@ -34,8 +30,10 @@
   text-align: center;
 
   &__code {
-    font-size: var(--font-size-xxxxl);
+    font-family: var(--font-family-display);
+    font-size: 4rem;
     font-weight: 800;
-    color: var(--color-text-muted);
+    line-height: 1;
+    color: var(--color-accent);
   }
 }

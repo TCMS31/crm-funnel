@@ -22,6 +22,7 @@ module ApplicationHelper
   end
 
   def nav_link_to(label, path)
-    link_to label, path, class: "nav__link#{' nav__link--active' if current_page?(path)}"
+    current = current_page?(path)
+    link_to label, path, class: "nav__link#{' nav__link--active' if current}", aria: { current: ('page' if current) }
   end
 end

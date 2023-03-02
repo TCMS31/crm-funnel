@@ -22,7 +22,7 @@ RSpec.describe 'Funnel dashboard' do
 
     get root_path
 
-    expect(response.body.scan('class="table table--moves"').size).to eq(DashboardController::RECENT_MOVES)
+    expect(response.body.scan('class="data-table__row"').size).to eq(DashboardController::RECENT_MOVES)
   end
 
   it 'renders an all-zero funnel without blowing up on an empty database' do
@@ -30,5 +30,12 @@ RSpec.describe 'Funnel dashboard' do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('Win rate')
+  end
+
+  it 'marks the funnel as the current page in the navigation' do
+    get root_path
+
+    current = response.parsed_body.css('nav a[aria-current="page"]').map(&:text)
+    expect(current).to eq(['Funnel'])
   end
 end

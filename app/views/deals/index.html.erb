@@ -19,15 +19,7 @@
     <%= render "deals/empty_state" %>
   <% else %>
     <div class="card">
-      <div class="table table--deals table--head">
-        <h2>Contact</h2>
-        <h2>Email</h2>
-        <h2>Stage</h2>
-        <h2>Company</h2>
-        <h2 class="table__numeric">Probability</h2>
-        <h2></h2>
-      </div>
-      <%= render @deals, cta: false %>
+      <%= render "deals/table", deals: @deals, caption: "Deals, newest first" %>
     </div>
     <%= paginate @deals %>
   <% end %>

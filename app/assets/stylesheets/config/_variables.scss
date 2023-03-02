@@ -1,71 +1,61 @@
+// "Ledger" palette: warm paper, ink text, a deep teal for actions and a
+// copper accent. Stage colours run cool (early) to warm (decided) and all
+// carry white text at 4.5:1 or better, except Diligence which uses ink.
 :root {
-  // Simple fonts
-  --font-family-sans: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --font-family-display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --font-family-sans: 'Public Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
-  // Classical line heights
   --line-height-headers: 1.1;
   --line-height-body:    1.5;
 
-  // Classical and robust font sizes system
-  --font-size-xs: 0.75rem;   // 12px
-  --font-size-s: 0.875rem;   // 14px
-  --font-size-m: 1rem;       // 16px
-  --font-size-l: 1.125rem;   // 18px
-  --font-size-xl: 1.25rem;   // 20px
-  --font-size-xxl: 1.5rem;   // 24px
-  --font-size-xxxl: 2rem;    // 32px
-  --font-size-xxxxl: 2.5rem; // 40px
+  --font-size-xs: 0.75rem;
+  --font-size-s: 0.875rem;
+  --font-size-m: 1rem;
+  --font-size-l: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-xxl: 1.5rem;
+  --font-size-xxxl: 2rem;
+  --font-size-xxxxl: 2.5rem;
 
-  // Three different text colors
-  --color-text-header: hsl(222, 25%, 18%);
-  --color-text-body:   hsl(222, 12%, 32%);
-  --color-text-muted:  hsl(222, 10%, 52%);
+  --color-text-header: hsl(200, 30%, 14%);
+  --color-text-body:   hsl(200, 14%, 24%);
+  --color-text-muted:  hsl(200, 8%, 38%);
 
-  // Classical and robust spacing system
-  --space-xxxs: 0.25rem; // 4px
-  --space-xxs: 0.375rem; // 6px
-  --space-xs: 0.5rem;    // 8px
-  --space-s: 0.75rem;    // 12px
-  --space-m: 1rem;       // 16px
-  --space-l: 1.5rem;     // 24px
-  --space-xl: 2rem;      // 32px
-  --space-xxl: 2.5rem;   // 40px
-  --space-xxxl: 3rem;    // 48px
-  --space-xxxxl: 4rem;   // 64px
+  --space-xxxs: 0.25rem;
+  --space-xxs: 0.375rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 2.5rem;
+  --space-xxxl: 3rem;
+  --space-xxxxl: 4rem;
 
-  // Application colors
-  --color-primary:          hsl(221, 76%, 50%);
-  --color-primary-rotate:   hsl(231, 74%, 56%);
-  --color-primary-bg:       hsl(221, 90%, 96%);
-  --color-secondary:        hsl(160, 60%, 38%);
-  --color-secondary-rotate: hsl(165, 58%, 33%);
-  --color-tertiary:         hsl(38, 92%, 56%);
-  --color-danger:           hsl(353, 70%, 48%);
-  --color-glint:            hsl(221, 100%, 82%);
+  --color-primary:       hsl(179, 60%, 20%);
+  --color-primary-hover: hsl(179, 62%, 15%);
+  --color-primary-bg:    hsl(175, 35%, 92%);
+  --color-accent:        hsl(22, 72%, 44%);
+  --color-danger:        hsl(355, 62%, 40%);
+  --color-danger-bg:     hsl(355, 70%, 96%);
+  --color-focus:         hsl(22, 85%, 55%);
 
-  // Funnel stage colors, light to dark along the pipeline
-  --color-stage-lead:      hsl(205, 78%, 55%);
-  --color-stage-contacted: hsl(190, 68%, 43%);
-  --color-stage-diligence: hsl(38, 90%, 52%);
-  --color-stage-closed:    hsl(160, 60%, 38%);
-  --color-stage-rejected:  hsl(353, 58%, 55%);
-  --color-stage-unstaged:  hsl(222, 10%, 60%);
+  --color-stage-lead:      hsl(205, 50%, 36%);
+  --color-stage-contacted: hsl(184, 60%, 27%);
+  --color-stage-diligence: hsl(40, 92%, 56%);
+  --color-stage-closed:    hsl(150, 52%, 27%);
+  --color-stage-rejected:  hsl(355, 58%, 40%);
+  --color-stage-unstaged:  hsl(30, 6%, 42%);
 
-  // Neutral colors
-  --color-white:      hsl(0, 0%, 100%);
-  --color-background: hsl(220, 30%, 97%);
-  --color-light:      hsl(220, 16%, 90%);
+  --color-white:      hsl(40, 33%, 99%);
+  --color-background: hsl(40, 30%, 95%);
+  --color-surface-alt: hsl(40, 25%, 97%);
+  --color-light:      hsl(38, 18%, 85%);
   --color-dark:       var(--color-text-header);
 
-  // Border radius
   --border-radius: 0.375rem;
   --border-radius-pill: 999px;
-
-  // Border
   --border: solid 1px var(--color-light);
 
-  // Shadows
-  --shadow-large:  0 4px 16px hsl(222 40% 20% / 0.08);
-  --shadow-small:  0 1px 3px hsl(222 40% 20% / 0.08);
+  --shadow-small: 0 1px 2px hsl(200 30% 14% / 0.06);
 }

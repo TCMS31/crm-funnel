@@ -1,0 +1,48 @@
+// A deal's stage history, oldest first, as an ordered list with a rail.
+.timeline {
+  list-style: none;
+  padding: var(--space-m) var(--space-m) var(--space-m) var(--space-xl);
+
+  &__item {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+    padding-bottom: var(--space-l);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0.45rem;
+      left: calc(-1 * var(--space-l));
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 1.2rem;
+      bottom: 0;
+      left: calc(-1 * var(--space-l) + 0.25rem);
+      width: 2px;
+      background-color: var(--color-light);
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+
+  &__time {
+    font-size: var(--font-size-s);
+    color: var(--color-text-muted);
+  }
+}

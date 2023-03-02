@@ -47,7 +47,7 @@
                    style="width: <%= @funnel.relative_width(stage) %>%"
                    role="img"
                    aria-label="<%= stage.name %>: <%= stage.deal_count %> deals"></div>
-              <span class="funnel__count"><%= number_with_delimiter stage.deal_count %></span>
+              <span class="funnel__count"><span><%= number_with_delimiter stage.deal_count %></span></span>
             </div>
             <span class="funnel__meta">avg <%= stage.average_probability %>% · exp <%= stage.expected_deals %></span>
           </div>
@@ -56,25 +56,34 @@
     </div>
   </div>
 
-  <div class="card mb-xxxxl" style="margin-top: var(--space-xl)">
+  <div class="card card--spaced">
     <h2 class="card__title">Latest stage moves</h2>
     <% if @recent_moves.empty? %>
       <div class="card__body"><p class="muted">Nothing has moved yet.</p></div>
     <% else %>
-      <div class="table table--moves table--head">
-        <h2>Contact</h2>
-        <h2>Company</h2>
-        <h2>Moved to</h2>
-        <h2>When</h2>
-      </div>
-      <% @recent_moves.each do |move| %>
-        <div class="table table--moves">
-          <p><%= link_to f_item(move.deal.user&.full_name), deal_path(move.deal) %></p>
-          <p class="table__muted"><%= f_item move.deal.company&.name %></p>
-          <p><%= stage_badge move.stage %></p>
-          <p class="table__muted"><%= time_ago_in_words(move.created_at) %> ago</p>
-        </div>
-      <% end %>
+      <table class="data-table data-table--moves">
+        <caption class="visually-hidden">The <%= DashboardController::RECENT_MOVES %> most recent stage moves</caption>
+        <thead>
+          <tr>
+            <th scope="col">Contact</th>
+            <th scope="col">Company</th>
+            <th scope="col">Moved to</th>
+            <th scope="col">When</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @recent_moves.each do |move| %>
+            <tr class="data-table__row">
+              <td data-label="Contact"><%= link_to f_item(move.deal.user&.full_name), deal_path(move.deal) %></td>
+              <td data-label="Company" class="data-table__muted"><%= f_item move.deal.company&.name %></td>
+              <td data-label="Moved to"><%= stage_badge move.stage %></td>
+              <td data-label="When" class="data-table__muted">
+                <time datetime="<%= move.created_at.iso8601 %>"><%= time_ago_in_words(move.created_at) %> ago</time>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     <% end %>
   </div>
 </main>

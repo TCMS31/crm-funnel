@@ -1,15 +1,17 @@
 .empty-state {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-m);
   padding: var(--space-xxl) var(--space-m);
-  border: var(--border);
-  border-style: dashed;
+  border: dashed 1px var(--color-light);
   border-radius: var(--border-radius);
   background-color: var(--color-white);
   text-align: center;
 
   &__text {
+    font-family: var(--font-family-display);
     font-size: var(--font-size-l);
+    font-weight: 600;
     color: var(--color-text-header);
-    margin-bottom: var(--space-l);
-    font-weight: bold;
   }
 }

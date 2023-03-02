@@ -17,15 +17,13 @@
 
   <div class="card">
     <h2 class="card__title">Stage history</h2>
-    <div class="table table--history table--head">
-      <h2>Stage</h2>
-      <h2>Recorded</h2>
-    </div>
-    <% @deal_histories.each do |history| %>
-      <div class="table table--history">
-        <p><%= stage_badge history.stage %></p>
-        <p class="table__muted"><%= l history.created_at, format: :long %></p>
-      </div>
-    <% end %>
+    <ol class="timeline">
+      <% @deal_histories.each do |history| %>
+        <li class="timeline__item">
+          <%= stage_badge history.stage %>
+          <time class="timeline__time" datetime="<%= history.created_at.iso8601 %>"><%= l history.created_at, format: :long %></time>
+        </li>
+      <% end %>
+    </ol>
   </div>
 </main>

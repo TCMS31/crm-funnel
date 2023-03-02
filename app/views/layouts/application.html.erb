@@ -3,28 +3,39 @@
   <head>
     <title><%= content_for(:title) || "CRM Funnel" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#14504f">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <nav class="nav">
-      <div class="nav__inner">
-        <%= link_to "CRM Funnel", root_path, class: "nav__brand" %>
-        <%= nav_link_to "Funnel", root_path %>
-        <%= nav_link_to "Deals", deals_path %>
-        <%= nav_link_to "Contacts", users_path %>
-        <%= nav_link_to "Companies", companies_path %>
-      </div>
-    </nav>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="nav">
+      <nav class="nav__inner" aria-label="Primary">
+        <%= link_to root_path, class: "nav__brand" do %>
+          <span class="nav__mark" aria-hidden="true"></span>CRM Funnel
+        <% end %>
+        <div class="nav__links">
+          <%= nav_link_to "Funnel", root_path %>
+          <%= nav_link_to "Deals", deals_path %>
+          <%= nav_link_to "Contacts", users_path %>
+          <%= nav_link_to "Companies", companies_path %>
+        </div>
+      </nav>
+    </header>
 
     <div id="flash" class="flash">
       <%= render "layouts/flash" %>
     </div>
 
-    <%= yield %>
+    <div id="main" tabindex="-1">
+      <%= yield %>
+    </div>
   </body>
 </html>

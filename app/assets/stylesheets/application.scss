@@ -1,27 +1,21 @@
-// Mixins
-@import "mixins/media";
+// Every partial only reads CSS custom properties from config/variables, so
+// they are loaded as plain modules with no shared Sass members.
+@use "config/variables";
+@use "config/reset";
+@use "config/animations";
 
-// Configuration
-@import "config/variables";
-@import "config/reset";
-@import "config/animations";
+@use "components/btn";
+@use "components/badge";
+@use "components/error_message";
+@use "components/form";
+@use "components/visually_hidden";
+@use "components/flash";
+@use "components/empty_state";
+@use "components/funnel";
+@use "components/table";
+@use "components/timeline";
+@use "components/turbo_progress_bar";
 
-// Components
-@import "components/btn";
-@import "components/badge";
-@import "components/error_message";
-@import "components/form";
-@import "components/visually_hidden";
-@import "components/flash";
-@import "components/empty_state";
-@import "components/funnel";
-@import "components/table";
-@import "components/turbo_progress_bar";
-
-// Layouts
-@import "layouts/container";
-@import "layouts/header";
-@import "layouts/nav";
-
-// Utilities
-@import "utilities/margins";
+@use "layouts/container";
+@use "layouts/header";
+@use "layouts/nav";

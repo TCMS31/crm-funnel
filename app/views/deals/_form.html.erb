@@ -7,11 +7,11 @@
                     label_method: :name, value_method: :id, include_blank: "—" %>
   <%= f.input :probability, as: :integer, input_html: { min: 0, max: 100, value: deal.probability } %>
 
-  <div class="input select">
+  <div class="form__group">
     <%= label_tag "deal_stage", "Opening stage", class: "form__label" %>
     <%= select_tag "deal[stage]",
                    options_for_select(DealHistory.stage_names, params.dig(:deal, :stage) || Crm::DealOpener::DEFAULT_STAGE),
-                   id: "deal_stage" %>
+                   id: "deal_stage", class: "form__input" %>
   </div>
 
   <div class="header__actions">

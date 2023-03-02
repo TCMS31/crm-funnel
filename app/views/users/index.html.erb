@@ -19,14 +19,21 @@
     <%= render "users/empty_state" %>
   <% else %>
     <div class="card">
-      <div class="table table--users table--head">
-        <h2>Name</h2>
-        <h2>Email</h2>
-        <h2>Phone</h2>
-        <h2>Company</h2>
-        <h2></h2>
-      </div>
-      <%= render @users %>
+      <table class="data-table data-table--users">
+        <caption class="visually-hidden">Contacts, newest first</caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Company</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= render @users %>
+        </tbody>
+      </table>
     </div>
     <%= paginate @users %>
   <% end %>

@@ -1,39 +1,67 @@
 .nav {
-  background-color: var(--color-white);
-  border-bottom: var(--border);
+  background-color: var(--color-primary);
+  color: var(--color-white);
 
   &__inner {
-    width: 92%;
-    max-width: 90rem;
-    margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-m);
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-m);
+    width: 92%;
+    max-width: 90rem;
+    margin: 0 auto;
     padding: var(--space-s) 0;
   }
 
   &__brand {
-    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-family-display);
     font-size: var(--font-size-l);
-    color: var(--color-text-header);
+    font-weight: 800;
+    color: var(--color-white);
     text-decoration: none;
-    margin-right: var(--space-s);
+
+    &:hover {
+      color: var(--color-white);
+      text-decoration: none;
+    }
+  }
+
+  // A small inverted funnel: the brand's only ornament.
+  &__mark {
+    width: 1.1rem;
+    height: 1rem;
+    background-color: var(--color-accent);
+    clip-path: polygon(0 0, 100% 0, 62% 55%, 62% 100%, 38% 100%, 38% 55%);
+  }
+
+  &__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xxxs);
   }
 
   &__link {
     padding: var(--space-xs) var(--space-s);
     border-radius: var(--border-radius);
-    color: var(--color-text-body);
-    text-decoration: none;
-    font-weight: 600;
+    color: hsl(175, 30%, 88%);
     font-size: var(--font-size-s);
+    font-weight: 600;
+    text-decoration: none;
 
-    &:hover { background-color: var(--color-primary-bg); }
-
-    &--active {
-      background-color: var(--color-primary);
+    &:hover {
       color: var(--color-white);
+      background-color: hsl(179 60% 30% / 0.6);
+      text-decoration: none;
+    }
+
+    &--active,
+    &--active:hover {
+      color: var(--color-text-header);
+      background-color: var(--color-white);
     }
   }
 }

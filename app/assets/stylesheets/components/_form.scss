@@ -23,7 +23,6 @@
     border-radius: var(--border-radius);
     background-color: var(--color-white);
     color: var(--color-text-body);
-    outline: none;
     transition: box-shadow 250ms, border-color 250ms;
 
     &:focus {
@@ -47,16 +46,6 @@
   }
 }
 
-.input.select {
-  display: grid;
-  gap: var(--space-xxs);
-}
-
-select.form__input,
-.input.select select {
-  padding: var(--space-xs) var(--space-s);
-  border: var(--border);
-  border-radius: var(--border-radius);
-  background-color: var(--color-white);
-  width: 100%;
+.form .header__actions {
+  margin-top: var(--space-xs);
 }
