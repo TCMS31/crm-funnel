@@ -1,10 +1,12 @@
-require:
+plugins:
   - rubocop-rails
   - rubocop-rspec
+  - rubocop-rspec_rails
 
 AllCops:
-  TargetRubyVersion: 3.1
+  TargetRubyVersion: 3.4
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'bin/**/*'
     - 'db/schema.rb'
@@ -42,10 +44,6 @@ RSpec/MultipleExpectations:
 
 RSpec/NestedGroups:
   Max: 4
-
-# The project targets Rails 7.0, whose enum syntax is the keyword form.
-Rails/EnumSyntax:
-  Enabled: false
 
 # Flash strings are plain English in a single-locale app; adding an i18n layer
 # for four sentences would be ceremony, not clarity.

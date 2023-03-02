@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Deals', type: :request do
+RSpec.describe 'Deals' do
   describe 'GET /deals' do
     it 'lists deals with their current stage and hides the empty state' do
       create(:deal, :staged, stages: %w[Lead Diligence], probability: 65)
@@ -58,8 +58,8 @@ RSpec.describe 'Deals', type: :request do
     it 're-renders the form with the error when the probability is out of range' do
       post deals_path, params: { deal: { user_id: user.id, company_id: company.id, probability: 140 } }
 
-      expect(response).to have_http_status(:unprocessable_entity)
-      expect(response.body).to match(/Probability/)
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Probability')
     end
   end
 

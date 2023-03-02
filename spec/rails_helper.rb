@@ -19,7 +19,7 @@ Rails.root.glob('spec/support/**/*.rb').each { |file| require file }
 RSpec::Matchers.define_negated_matcher :not_change, :change
 
 RSpec.configure do |config|
-  config.fixture_path = Rails.root.join('spec/fixtures').to_s
+  config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!

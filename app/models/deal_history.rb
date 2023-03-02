@@ -10,21 +10,11 @@ class DealHistory < ApplicationRecord
 
   belongs_to :deal
 
-  enum stage: STAGES
+  # `validate: true` turns an unknown stage from a form into a validation
+  # error instead of the ArgumentError (and 500) a plain enum raises.
+  enum :stage, STAGES, validate: true
 
   validates :stage, presence: true
-  validate :stage_must_be_known
-
-  # ActiveRecord's enum raises ArgumentError on an unknown value, which turns a
-  # bad form submission into a 500. Capture it and report it as a validation
-  # error instead, without loosening the enum itself.
-  def stage=(value)
-    @unknown_stage = nil
-    super
-  rescue ArgumentError
-    @unknown_stage = value
-    super(nil)
-  end
 
   scope :chronological, -> { order(created_at: :asc, id: :asc) }
 
@@ -40,13 +30,5 @@ class DealHistory < ApplicationRecord
 
   def terminal?
     [WON_STAGE, LOST_STAGE].include?(stage)
-  end
-
-  private
-
-  def stage_must_be_known
-    return if @unknown_stage.blank?
-
-    errors.add(:stage, "#{@unknown_stage.inspect} is not one of #{self.class.stage_names.join(', ')}")
   end
 end

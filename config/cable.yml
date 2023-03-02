@@ -1,11 +1,10 @@
+# Nothing broadcasts over Action Cable yet, so every environment uses the
+# in-process adapter and the app needs no Redis.
 development:
-  adapter: redis
-  url: redis://localhost:6379/1
+  adapter: async
 
 test:
   adapter: test
 
 production:
-  adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: railway
+  adapter: async

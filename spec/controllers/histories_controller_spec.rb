@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe HistoriesController, type: :controller do
+RSpec.describe HistoriesController do
   let(:deal) { FactoryBot.create(:deal, :staged, stages: %w[Lead]) }
 
   describe 'GET #new' do

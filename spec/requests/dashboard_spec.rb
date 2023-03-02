@@ -4,7 +4,7 @@ require 'rails_helper'
 
 # Request specs render views for real. The controller specs did not, which is
 # how a template error on /deals/new stayed green for the whole project.
-RSpec.describe 'Funnel dashboard', type: :request do
+RSpec.describe 'Funnel dashboard' do
   it 'renders the funnel with a count for every stage' do
     create(:deal, :staged, stages: %w[Lead])
     create(:deal, :staged, stages: %w[Lead Contacted])

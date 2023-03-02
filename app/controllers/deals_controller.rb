@@ -12,7 +12,7 @@ class DealsController < ApplicationController
   end
 
   def show
-    @deal_histories = @deal.deal_histories.includes(:deal)
+    @deal_histories = @deal.deal_histories
   end
 
   def new
@@ -26,17 +26,17 @@ class DealsController < ApplicationController
       redirect_to deal_path(@deal), notice: 'Deal was successfully created.'
     else
       flash.now[:alert] = @deal.errors.full_messages.to_sentence
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
   private
 
   def set_deal
-    @deal = Deal.with_current_stage.find(params[:id])
+    @deal = Deal.with_current_stage.find(params.expect(:id))
   end
 
   def deal_params
-    params.require(:deal).permit(:user_id, :company_id, :probability)
+    params.expect(deal: %i[user_id company_id probability])
   end
 end

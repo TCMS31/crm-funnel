@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Health probe', type: :request do
+RSpec.describe 'Health probe' do
   it 'reports ok when the database answers' do
     get health_path
 

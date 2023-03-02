@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Contacts and companies', type: :request do
+RSpec.describe 'Contacts and companies' do
   describe 'GET /users' do
     it 'lists contacts with their company' do
       create(:user, first_name: 'Ada', last_name: 'Lovelace', company: create(:company, name: 'Initech'))
@@ -37,7 +37,7 @@ RSpec.describe 'Contacts and companies', type: :request do
 
       get edit_user_path(user)
 
-      selected = Nokogiri::HTML(response.body).at_css('#user_company_id option[selected]')
+      selected = response.parsed_body.at_css('#user_company_id option[selected]')
       expect(selected&.text).to eq('Aardvark Holdings')
     end
   end
@@ -48,7 +48,7 @@ RSpec.describe 'Contacts and companies', type: :request do
 
       post users_path, params: { user: attributes_for(:user, email: 'ADA@example.com') }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('Email has already been taken')
     end
   end

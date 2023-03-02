@@ -16,17 +16,17 @@ class HistoriesController < ApplicationController
       redirect_to deal_path(@deal), notice: "Deal moved to #{@deal_history.stage}."
     else
       flash.now[:alert] = @deal_history.errors.full_messages.to_sentence
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
   private
 
   def set_deal
-    @deal = Deal.find(params[:deal_id])
+    @deal = Deal.find(params.expect(:deal_id))
   end
 
   def deal_history_params
-    params.require(:deal_history).permit(:stage)
+    params.expect(deal_history: [:stage])
   end
 end

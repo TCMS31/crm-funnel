@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe UsersController, type: :controller do
+RSpec.describe UsersController do
   describe 'GET #index' do
     it 'assigns @users in reverse chronological order' do
       user1 = FactoryBot.create(:user, created_at: 1.hour.ago)

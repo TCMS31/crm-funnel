@@ -3,7 +3,8 @@
 # ---------- build ----------
 # Compiles native gems and precompiles assets, so none of the toolchain has to
 # ship in the final image.
-FROM ruby:3.1.3-slim AS build
+ARG RUBY_VERSION=3.4.12
+FROM ruby:${RUBY_VERSION}-slim AS build
 
 ENV RAILS_ENV=production \
     BUNDLE_DEPLOYMENT=1 \
@@ -22,13 +23,13 @@ RUN bundle install && \
 
 COPY . .
 
-# SECRET_KEY_BASE is only needed to boot the app for `assets:precompile`; the
-# real one comes from the environment at run time.
-RUN SECRET_KEY_BASE=precompile-placeholder bundle exec rake assets:precompile && \
+# Booting the app for `assets:precompile` needs a secret, not the real one;
+# that comes from the environment at run time.
+RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile && \
     rm -rf tmp/cache log/*
 
 # ---------- runtime ----------
-FROM ruby:3.1.3-slim AS runtime
+FROM ruby:${RUBY_VERSION}-slim AS runtime
 
 ENV RAILS_ENV=production \
     BUNDLE_DEPLOYMENT=1 \

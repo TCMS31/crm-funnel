@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe CompaniesController, type: :controller do
+RSpec.describe CompaniesController do
   describe 'GET #index' do
     let(:company) { FactoryBot.create(:company) }
 

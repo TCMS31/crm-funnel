@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe DashboardController, type: :controller do
+RSpec.describe DashboardController do
   describe 'GET #show' do
     it 'renders the show template' do
       get :show

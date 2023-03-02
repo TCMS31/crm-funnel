@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe DealHistory, type: :model do
+RSpec.describe DealHistory do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:stage) }
   end

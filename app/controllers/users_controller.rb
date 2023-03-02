@@ -28,7 +28,7 @@ class UsersController < ApplicationController
       redirect_to users_path, notice: 'Contact was successfully created.'
     else
       flash.now[:alert] = @user.errors.full_messages.to_sentence
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -37,7 +37,7 @@ class UsersController < ApplicationController
       redirect_to users_path, notice: 'Contact was successfully updated.'
     else
       flash.now[:alert] = @user.errors.full_messages.to_sentence
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -52,10 +52,10 @@ class UsersController < ApplicationController
   private
 
   def set_user
-    @user = User.find(params[:id])
+    @user = User.find(params.expect(:id))
   end
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :phone_number, :company_id)
+    params.expect(user: %i[first_name last_name email phone_number company_id])
   end
 end

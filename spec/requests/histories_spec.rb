@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Deal stage history', type: :request do
+RSpec.describe 'Deal stage history' do
   let!(:deal) { create(:deal, :staged, stages: %w[Lead], probability: 50) }
 
   it 'renders the move-stage form for a deal' do
@@ -41,7 +41,7 @@ RSpec.describe 'Deal stage history', type: :request do
   it 're-renders the form when the stage is not a funnel stage' do
     post deal_histories_path(deal), params: { deal_history: { stage: 'Negotiating' } }
 
-    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response).to have_http_status(:unprocessable_content)
     expect(deal.reload.current_deal_stage).to eq('Lead')
   end
 end

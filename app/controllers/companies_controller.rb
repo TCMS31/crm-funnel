@@ -23,7 +23,7 @@ class CompaniesController < ApplicationController
       redirect_to companies_path, notice: 'Company was successfully created.'
     else
       flash.now[:alert] = @company.errors.full_messages.to_sentence
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -32,7 +32,7 @@ class CompaniesController < ApplicationController
       redirect_to companies_path, notice: 'Company was successfully updated.'
     else
       flash.now[:alert] = @company.errors.full_messages.to_sentence
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -47,10 +47,10 @@ class CompaniesController < ApplicationController
   private
 
   def set_company
-    @company = Company.find(params[:id])
+    @company = Company.find(params.expect(:id))
   end
 
   def company_params
-    params.require(:company).permit(:name)
+    params.expect(company: [:name])
   end
 end

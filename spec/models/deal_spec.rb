@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Deal, type: :model do
+RSpec.describe Deal do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:probability) }
 
