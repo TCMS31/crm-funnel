@@ -1,9 +1,9 @@
 <%= simple_form_for deal, html: { class: "deal form" } do |f| %>
   <%= form_error_notification(deal) %>
 
-  <%= f.association :user, label: "Contact", collection: User.recent.limit(200),
+  <%= f.association :user, label: "Contact", collection: User.order(:last_name, :first_name),
                     label_method: :full_name, value_method: :id, include_blank: "—" %>
-  <%= f.association :company, collection: Company.recent.limit(200),
+  <%= f.association :company, collection: Company.order(:name),
                     label_method: :name, value_method: :id, include_blank: "—" %>
   <%= f.input :probability, as: :integer, input_html: { min: 0, max: 100, value: deal.probability } %>
 

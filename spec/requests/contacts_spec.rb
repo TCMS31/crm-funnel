@@ -26,6 +26,22 @@ RSpec.describe 'Contacts and companies', type: :request do
     end
   end
 
+  describe 'GET /users/:id/edit' do
+    # Regression: the company select only offered the 200 newest companies, so
+    # editing a contact at an older company showed a blank choice and saving
+    # the form detached them from it.
+    it 'keeps the current company selectable however old it is' do
+      company = create(:company, name: 'Aardvark Holdings', created_at: 1.year.ago)
+      user = create(:user, company: company)
+      create_list(:company, 200)
+
+      get edit_user_path(user)
+
+      selected = Nokogiri::HTML(response.body).at_css('#user_company_id option[selected]')
+      expect(selected&.text).to eq('Aardvark Holdings')
+    end
+  end
+
   describe 'POST /users' do
     it 'rejects a duplicate e-mail and re-renders the form with the reason' do
       create(:user, email: 'ada@example.com')
@@ -64,4 +80,5 @@ RSpec.describe 'Contacts and companies', type: :request do
       expect(deal.deal_histories.count).to eq(1)
     end
   end
+
 end
