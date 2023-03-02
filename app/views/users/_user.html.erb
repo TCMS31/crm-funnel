@@ -1,0 +1,12 @@
+<div class="table table--users">
+  <p><%= link_to user.full_name, user_path(user) %></p>
+  <p class="table__muted"><%= user.email %></p>
+  <p class="table__muted"><%= f_item user.phone_number %></p>
+  <p><%= f_item user.company&.name %></p>
+
+  <div class="table__actions">
+    <%= link_to "Edit", edit_user_path(user), class: "btn btn--light" %>
+    <%= button_to "Delete", user_path(user), method: :delete, class: "btn btn--light",
+                  form: { data: { turbo_confirm: "Delete #{user.full_name}?" } } %>
+  </div>
+</div>

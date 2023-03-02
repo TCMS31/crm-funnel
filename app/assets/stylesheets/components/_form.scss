@@ -1,0 +1,62 @@
+.form {
+  display: grid;
+  gap: var(--space-m);
+  max-width: 34rem;
+
+  &__group {
+    display: grid;
+    gap: var(--space-xxs);
+  }
+
+  &__label {
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    color: var(--color-text-header);
+  }
+
+  &__input {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: var(--space-xs) var(--space-s);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-white);
+    color: var(--color-text-body);
+    outline: none;
+    transition: box-shadow 250ms, border-color 250ms;
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-bg);
+    }
+
+    &--invalid {
+      border-color: var(--color-danger);
+    }
+  }
+
+  &__error {
+    font-size: var(--font-size-xs);
+    color: var(--color-danger);
+  }
+
+  &__hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
+}
+
+.input.select {
+  display: grid;
+  gap: var(--space-xxs);
+}
+
+select.form__input,
+.input.select select {
+  padding: var(--space-xs) var(--space-s);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-white);
+  width: 100%;
+}

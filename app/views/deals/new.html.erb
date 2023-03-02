@@ -1,0 +1,14 @@
+<% content_for :title, "New deal — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to deals"), deals_path, class: "breadcrumb" %>
+
+  <div class="header">
+    <h1>New deal</h1>
+  </div>
+
+  <div class="card">
+    <div class="card__body">
+      <%= render "form", deal: @deal %>
+    </div>
+  </div>
+</main>

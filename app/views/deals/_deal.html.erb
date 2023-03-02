@@ -1,0 +1,15 @@
+<div class="table table--deals">
+  <p><%= f_item deal.user&.full_name %></p>
+  <p class="table__muted"><%= f_item deal.user&.email %></p>
+  <p><%= stage_badge deal.current_deal_stage %></p>
+  <p><%= f_item deal.company&.name %></p>
+  <p class="table__numeric"><%= deal.probability %>%</p>
+
+  <div class="table__actions">
+    <% if cta %>
+      <%= link_to "Move stage", new_deal_history_path(deal), class: "btn btn--primary" %>
+    <% else %>
+      <%= link_to "Details", deal_path(deal), class: "btn btn--light" %>
+    <% end %>
+  </div>
+</div>

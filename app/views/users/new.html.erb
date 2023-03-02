@@ -1,0 +1,6 @@
+<% content_for :title, "New contact — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to contacts"), users_path, class: "breadcrumb" %>
+  <div class="header"><h1>New contact</h1></div>
+  <div class="card"><div class="card__body"><%= render "form", user: @user %></div></div>
+</main>

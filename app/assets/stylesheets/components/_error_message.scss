@@ -1,0 +1,10 @@
+.error-message {
+  padding: var(--space-s) var(--space-m);
+  border: solid 1px var(--color-danger);
+  border-left-width: 4px;
+  border-radius: var(--border-radius);
+  background-color: hsl(353, 80%, 97%);
+  color: var(--color-danger);
+  font-size: var(--font-size-s);
+  font-weight: 600;
+}

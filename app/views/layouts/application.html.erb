@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "CRM Funnel" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <nav class="nav">
+      <div class="nav__inner">
+        <%= link_to "CRM Funnel", root_path, class: "nav__brand" %>
+        <%= nav_link_to "Funnel", root_path %>
+        <%= nav_link_to "Deals", deals_path %>
+        <%= nav_link_to "Contacts", users_path %>
+        <%= nav_link_to "Companies", companies_path %>
+      </div>
+    </nav>
+
+    <div id="flash" class="flash">
+      <%= render "layouts/flash" %>
+    </div>
+
+    <%= yield %>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+.nav {
+  background-color: var(--color-white);
+  border-bottom: var(--border);
+
+  &__inner {
+    width: 92%;
+    max-width: 90rem;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-m);
+    padding: var(--space-s) 0;
+  }
+
+  &__brand {
+    font-weight: 800;
+    font-size: var(--font-size-l);
+    color: var(--color-text-header);
+    text-decoration: none;
+    margin-right: var(--space-s);
+  }
+
+  &__link {
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--border-radius);
+    color: var(--color-text-body);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: var(--font-size-s);
+
+    &:hover { background-color: var(--color-primary-bg); }
+
+    &--active {
+      background-color: var(--color-primary);
+      color: var(--color-white);
+    }
+  }
+}

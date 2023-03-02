@@ -1,0 +1,26 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-l);
+
+  h1 {
+    font-size: var(--font-size-xxxl);
+    line-height: var(--line-height-headers);
+    color: var(--color-text-header);
+  }
+
+  &__subtitle {
+    margin-top: var(--space-xxs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-s);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+}

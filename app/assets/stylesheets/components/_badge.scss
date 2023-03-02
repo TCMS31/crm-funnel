@@ -1,0 +1,18 @@
+.badge {
+  display: inline-block;
+  padding: var(--space-xxxs) var(--space-xs);
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-white);
+  background-color: var(--color-stage-unstaged);
+  white-space: nowrap;
+
+  &--lead      { background-color: var(--color-stage-lead); }
+  &--contacted { background-color: var(--color-stage-contacted); }
+  &--diligence { background-color: var(--color-stage-diligence); color: var(--color-text-header); }
+  &--closed    { background-color: var(--color-stage-closed); }
+  &--rejected  { background-color: var(--color-stage-rejected); }
+  &--unstaged  { background-color: var(--color-stage-unstaged); }
+}
