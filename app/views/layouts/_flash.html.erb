@@ -1,6 +1,7 @@
 <% flash.each do |flash_type, message| %>
   <div
-    class="flash__message"
+    class="flash__message flash__message--<%= flash_type == "alert" ? "alert" : "notice" %>"
+    role="<%= flash_type == "alert" ? "alert" : "status" %>"
     data-controller="removals"
     data-action="animationend->removals#remove"
   >

@@ -81,4 +81,18 @@ RSpec.describe 'Contacts and companies', type: :request do
     end
   end
 
+  describe 'flash messages' do
+    it 'announces a notice politely and an alert assertively' do
+      post users_path, params: { user: attributes_for(:user) }
+      follow_redirect!
+      expect(response.body).to include('role="status"')
+
+      company = create(:company)
+      allow(Company).to receive(:find).and_return(company)
+      allow(company).to receive(:destroy).and_return(false)
+      delete company_path(company)
+      follow_redirect!
+      expect(response.body).to include('role="alert"')
+    end
+  end
 end

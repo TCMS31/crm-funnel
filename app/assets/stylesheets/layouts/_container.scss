@@ -26,3 +26,16 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-s);
 }
+
+.not-found {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-m);
+  text-align: center;
+
+  &__code {
+    font-size: var(--font-size-xxxxl);
+    font-weight: 800;
+    color: var(--color-text-muted);
+  }
+}

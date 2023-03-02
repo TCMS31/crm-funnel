@@ -1,8 +1,7 @@
-<div style="text-align: center; margin: auto;">
-  <h1>404</h1>
-  <h3>Page not found</h3>
-  <p>oops! the page you are looking for doesn't exists. It might have been moved or deleted.</p>
-  <div>
-    <a href='/deals' class='btn btn--primary'>Back To Deals </a>
-  </div>
-</div>
+<% content_for :title, "Not found — CRM Funnel" %>
+<main class="container not-found">
+  <p class="not-found__code">404</p>
+  <h1>Page not found</h1>
+  <p class="muted">That record does not exist. It may have been deleted, or the link is wrong.</p>
+  <%= link_to "Back to deals", deals_path, class: "btn btn--primary" %>
+</main>
