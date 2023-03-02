@@ -406,7 +406,7 @@ DEPENDENCIES
   importmap-rails (~> 2.1)
   kaminari (~> 1.2)
   pg (~> 1.5)
-  puma (>= 6.4)
+  puma (~> 8.0)
   rails (~> 8.1.0)
   rails-controller-testing (~> 1.0)
   rspec-rails (~> 8.0)
