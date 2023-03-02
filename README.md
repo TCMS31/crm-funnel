@@ -4,10 +4,13 @@ A Rails app that turns a flat contact export into a sales pipeline. A deal has n
 stage column: its position is the stage of its newest `deal_histories` row, so the
 funnel is a view over what actually happened rather than a mutable status field.
 
-It ships with the export it was built around — `crm_data.csv`, 1,000 rows, one stage
-per row, 900 distinct e-mail addresses.
+It ships with the export it was built around — `crm_data.csv`, 1,000 rows of
+generated demo contacts, one stage per row, 900 distinct e-mail addresses.
 
-![The pipeline funnel](docs/screenshots/funnel-dashboard.png)
+Built on Ruby 3.4 and Rails 8.1 with PostgreSQL, server-rendered ERB, Turbo and a
+little Stimulus, Kaminari for paging and hand-written SCSS compiled by Dart Sass.
+
+![The pipeline funnel on a freshly imported database](docs/screenshots/funnel-dashboard.png)
 
 Every deal is counted once, in one stage, and the five stage counts sum to the deal
 count. The tiles are derived: open is the three non-terminal stages, *expected to
@@ -54,16 +57,16 @@ means a history row inserted out of order still reports correctly.
 
 ![Stage history for one deal](docs/screenshots/deal-stage-history.png)
 
-That deal was walked Lead → Contacted → Diligence through the form while the
-screenshots were being taken, and a second one was moved Contacted → Diligence,
-which is why the dashboard above shows 154 deals in Diligence where a freshly
-imported database has 152.
+That deal was walked Lead → Contacted → Diligence through the *Move stage* form
+while the screenshots were taken. The dashboard above was captured before that, on
+a freshly imported database, so its 152 deals in Diligence are what the import
+produces.
 
 ## Importing the export
 
 ```
 $ bin/rails db:seed
-Imported /path/to/crm-funnel/crm_data.csv
+Imported /app/crm_data.csv
   read 1000 rows -> 900 new contacts, 162 new companies, 900 new deals,
   900 stage entries (100 duplicate rows merged, 21 probabilities clamped, 0 rows rejected)
 ```
@@ -157,12 +160,13 @@ into Lead, and an empty pipeline returns zeroes rather than dividing by zero.
 
 ## Query budget
 
-Measured here by counting `sql.active_record` notifications on the bundled 1,000-row
-dataset:
+Measured by counting `sql.active_record` notifications (schema and transaction
+statements excluded) against an empty database and the bundled 1,000-row export:
 
 | | queries |
 | --- | --- |
 | Import all 1,000 rows | 8 |
+| Re-run the same import (writes nothing) | 5 |
 | Deals index, loading one page of 20 | 3 |
 | Whole funnel dashboard report | 1 |
 
@@ -184,28 +188,62 @@ dashboard's activity list is capped at 8 rows, so no page grows with the table.
 Each row's badge is the stage the LATERAL join returned — 900 deals over 45 pages,
 still three queries to load them.
 
-## Running it locally
+## The interface
 
-Ruby 3.1.3 and a PostgreSQL server are the only prerequisites.
+Every list is a real `<table>` with scoped column headers, so a screen reader can
+announce *Stage: Diligence* rather than a bare word. Below 48rem the same markup
+turns each row into a labelled card instead of a table that scrolls sideways, and
+the funnel bars move their averages under the bar.
+
+<p>
+  <img src="docs/screenshots/funnel-dashboard-mobile.png" alt="Funnel dashboard at phone width" width="260">
+  <img src="docs/screenshots/deals-index-mobile.png" alt="Deals list at phone width, one card per deal" width="260">
+</p>
+
+Other details: a skip link, `aria-current` on the active navigation item, row
+actions labelled with the contact they act on, notices announced as `role=status`
+and errors as `role=alert`, and flash messages that stay put under
+`prefers-reduced-motion` instead of fading. The stage colours keep white text at
+4.5:1 or better (Diligence uses dark text on amber).
+
+![Contacts index](docs/screenshots/contacts-index.png)
+
+## Running it
+
+The quickest path is Docker Compose, which builds the production image, starts
+PostgreSQL 16, loads the schema and imports `crm_data.csv` on first boot:
+
+```bash
+docker compose up --build
+# app:      http://localhost:8630
+# postgres: localhost:8631 (user crm, password crm)
+```
+
+The ports are deliberately off 3000 and 5432 so they cannot collide with local
+services. The image is multi-stage, runs as a non-root user and healthchecks `/up`.
+Compose falls back to a placeholder `SECRET_KEY_BASE`; set a real one (`bin/rails
+secret`) before deploying it anywhere.
+
+Without Docker you need Ruby 3.4.12 (see `.ruby-version`) and a PostgreSQL server:
 
 ```bash
 bundle install
 cp .env.example .env      # adjust PGUSER / PGPASSWORD for your machine
-bin/rails db:prepare      # create and load schema
-bin/rails db:seed         # import crm_data.csv
+bin/rails db:prepare      # create, load schema and import crm_data.csv
 bin/rails server          # http://localhost:3000
 ```
 
-`GET /up` is a health probe that executes a query, so a process that cannot reach
-Postgres reports `503` instead of accepting traffic it cannot serve.
+`bin/setup` runs the same steps. `GET /up` is a health probe that executes a query,
+so a process that cannot reach Postgres reports `503` instead of accepting traffic
+it cannot serve:
 
-With Docker, `docker compose up --build` puts the app on port 8630 and Postgres on
-8631 (deliberately off 3000 and 5432 so they cannot collide with local services).
-Be aware of what has and has not been checked: `docker compose config` parses, but the
-image has never been built or booted here — the uplift log for this repo records
-`Build verified: NOT RUN — deferred, Docker off` and the same for boot. The Dockerfile
-is multi-stage, runs as a non-root user and healthchecks `/up`, but treat it as
-unproven until you build it.
+```
+$ curl -i http://localhost:8630/up
+HTTP/1.1 200 OK
+content-type: application/json; charset=utf-8
+
+{"status":"ok","database":"ok"}
+```
 
 ## Configuration
 
@@ -228,22 +266,25 @@ loads a local `.env` if there is one.
 ## Working on it
 
 ```bash
-bundle exec rspec           # 109 examples, 0 failures
+RAILS_ENV=test bin/rails db:prepare
+bundle exec rspec           # 113 examples, 0 failures
 bundle exec rubocop         # 73 files inspected, no offenses detected
 bundle exec rspec spec/services spec/queries    # just the import and the funnel arithmetic
 CRM_IMPORT_CSV=other.csv bin/rails db:seed
 ```
 
-Both results are from the last run in this checkout. The specs in `spec/requests/`
-render views for real, which is what catches a template error a controller spec would
-sail past.
+The suite needs a reachable PostgreSQL (it uses `PGDATABASE_TEST`, default
+`crm_funnel_test`). The specs in `spec/requests/` render views for real, which is
+what catches a template error a controller spec would sail past.
 
 Where the work is: `app/services/crm/` (the import, and `deal_opener.rb`),
 `app/queries/crm/funnel_report.rb` (the pipeline aggregation),
 `app/models/deal.rb` (`with_current_stage`, `for_index`) and
 `app/models/deal_history.rb` (the stage enum and its validation). Controllers are
 thin — params in, one service or scope, a template out. `db/seeds.rb` is eight lines
-that call the importer. Styling is hand-written SCSS with no framework.
+that call the importer. Styling is hand-written SCSS with no framework, one partial
+per component under `app/assets/stylesheets/`, with the palette and type scale as
+custom properties in `config/_variables.scss`.
 
 ## What it deliberately does not do
 
@@ -261,3 +302,6 @@ that call the importer. Styling is hand-written SCSS with no framework.
 - **English only, and no soft deletes.** Flash messages and labels are literals, and a
   deleted contact or company is gone even though their deals survive.
 
+## License
+
+MIT — see [LICENSE](LICENSE).
