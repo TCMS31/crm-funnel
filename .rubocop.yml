@@ -1,0 +1,66 @@
+require:
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  Exclude:
+    - 'bin/**/*'
+    - 'db/schema.rb'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+
+Style/Documentation:
+  Enabled: false
+
+# Rails generates these; they are not ours to restyle.
+Rails/Output:
+  Exclude:
+    - 'db/seeds.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'config/**/*'
+
+Metrics/MethodLength:
+  Max: 25
+
+Metrics/AbcSize:
+  Max: 25
+
+Layout/LineLength:
+  Max: 120
+
+RSpec/ExampleLength:
+  Max: 20
+
+RSpec/MultipleExpectations:
+  Max: 6
+
+RSpec/NestedGroups:
+  Max: 4
+
+# The project targets Rails 7.0, whose enum syntax is the keyword form.
+Rails/EnumSyntax:
+  Enabled: false
+
+# Flash strings are plain English in a single-locale app; adding an i18n layer
+# for four sentences would be ceremony, not clarity.
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
+# The importer bulk-writes on purpose: Crm::Import::ContactRow validates every
+# row before it gets near the database, and row-at-a-time saves were the
+# original performance bug.
+Rails/SkipsModelValidations:
+  Exclude:
+    - 'app/services/crm/contact_import.rb'
+
+RSpec/NamedSubject:
+  Enabled: false
