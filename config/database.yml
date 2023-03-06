@@ -1,0 +1,22 @@
+# Every environment reads the standard libpq variables, so the same config works
+# for a local install, a Docker Compose service and a managed database.
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  host: <%= ENV.fetch("PGHOST", "localhost") %>
+  port: <%= ENV.fetch("PGPORT", 5432) %>
+  username: <%= ENV.fetch("PGUSER", nil) %>
+  password: <%= ENV.fetch("PGPASSWORD", nil) %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("PGDATABASE", "crm_funnel_development") %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("PGDATABASE_TEST", "crm_funnel_test") %>
+
+production:
+  <<: *default
+  database: <%= ENV.fetch("PGDATABASE", "crm_funnel_production") %>
