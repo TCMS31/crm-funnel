@@ -1,0 +1,19 @@
+<% content_for :title, "Move stage — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to deal"), deal_path(@deal), class: "breadcrumb" %>
+
+  <div class="header">
+    <div>
+      <h1>Move stage</h1>
+      <p class="header__subtitle">
+        <%= f_item @deal.user&.full_name %> · currently <%= stage_badge @deal.current_deal_stage %>
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__body">
+      <%= render "form", deal_history: @deal_history, deal: @deal %>
+    </div>
+  </div>
+</main>

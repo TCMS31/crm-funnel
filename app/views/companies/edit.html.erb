@@ -1,0 +1,6 @@
+<% content_for :title, "Edit company — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to companies"), companies_path, class: "breadcrumb" %>
+  <div class="header"><h1>Edit <%= @company.name %></h1></div>
+  <div class="card"><div class="card__body"><%= render "form", company: @company %></div></div>
+</main>

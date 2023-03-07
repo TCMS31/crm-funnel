@@ -1,0 +1,11 @@
+<div class="table table--companies">
+  <p><%= company.name %></p>
+  <p class="table__numeric"><%= company.users_count %></p>
+  <p class="table__numeric"><%= company.deals_count %></p>
+
+  <div class="table__actions">
+    <%= link_to "Edit", edit_company_path(company), class: "btn btn--light" %>
+    <%= button_to "Delete", company_path(company), method: :delete, class: "btn btn--light",
+                  form: { data: { turbo_confirm: "Delete #{company.name}?" } } %>
+  </div>
+</div>

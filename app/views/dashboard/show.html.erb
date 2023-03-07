@@ -1,0 +1,80 @@
+<% content_for :title, "Funnel — CRM Funnel" %>
+<main class="container">
+  <div class="header">
+    <div>
+      <h1>Pipeline funnel</h1>
+      <p class="header__subtitle">
+        Every deal counted once, in the stage of its most recent history entry.
+      </p>
+    </div>
+    <div class="header__actions">
+      <%= link_to "Browse deals", deals_path, class: "btn btn--primary" %>
+    </div>
+  </div>
+
+  <section class="stats" aria-label="Pipeline summary">
+    <div class="stat">
+      <p class="stat__label">Total deals</p>
+      <p class="stat__value"><%= number_with_delimiter @funnel.total_deals %></p>
+      <p class="stat__hint"><%= pluralize @funnel.unstaged_deals, "deal" %> with no stage yet</p>
+    </div>
+    <div class="stat">
+      <p class="stat__label">Open</p>
+      <p class="stat__value"><%= number_with_delimiter @funnel.open_deals %></p>
+      <p class="stat__hint">Lead, Contacted or Diligence</p>
+    </div>
+    <div class="stat">
+      <p class="stat__label">Expected to close</p>
+      <p class="stat__value"><%= @funnel.expected_open_deals %></p>
+      <p class="stat__hint">Sum of open probabilities ÷ 100</p>
+    </div>
+    <div class="stat">
+      <p class="stat__label">Win rate</p>
+      <p class="stat__value"><%= @funnel.win_rate %>%</p>
+      <p class="stat__hint"><%= @funnel.won_deals %> won / <%= @funnel.lost_deals %> lost</p>
+    </div>
+  </section>
+
+  <div class="card">
+    <h2 class="card__title">Deals by current stage</h2>
+    <div class="card__body">
+      <div class="funnel">
+        <% @funnel.stages.each do |stage| %>
+          <div class="funnel__row">
+            <%= stage_badge stage.name %>
+            <div class="funnel__bar">
+              <div class="funnel__fill funnel__fill--<%= stage.name.downcase %>"
+                   style="width: <%= @funnel.relative_width(stage) %>%"
+                   role="img"
+                   aria-label="<%= stage.name %>: <%= stage.deal_count %> deals"></div>
+              <span class="funnel__count"><%= number_with_delimiter stage.deal_count %></span>
+            </div>
+            <span class="funnel__meta">avg <%= stage.average_probability %>% · exp <%= stage.expected_deals %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-xxxxl" style="margin-top: var(--space-xl)">
+    <h2 class="card__title">Latest stage moves</h2>
+    <% if @recent_moves.empty? %>
+      <div class="card__body"><p class="muted">Nothing has moved yet.</p></div>
+    <% else %>
+      <div class="table table--moves table--head">
+        <h2>Contact</h2>
+        <h2>Company</h2>
+        <h2>Moved to</h2>
+        <h2>When</h2>
+      </div>
+      <% @recent_moves.each do |move| %>
+        <div class="table table--moves">
+          <p><%= link_to f_item(move.deal.user&.full_name), deal_path(move.deal) %></p>
+          <p class="table__muted"><%= f_item move.deal.company&.name %></p>
+          <p><%= stage_badge move.stage %></p>
+          <p class="table__muted"><%= time_ago_in_words(move.created_at) %> ago</p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</main>

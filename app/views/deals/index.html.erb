@@ -1,0 +1,34 @@
+<% content_for :title, "Deals — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to funnel"), root_path, class: "breadcrumb" %>
+
+  <div class="header">
+    <div>
+      <h1>Deals</h1>
+      <p class="header__subtitle">
+        <%= number_with_delimiter @deals.total_count %> deals ·
+        page <%= @deals.current_page %> of <%= @deals.total_pages %>
+      </p>
+    </div>
+    <div class="header__actions">
+      <%= link_to "New deal", new_deal_path, class: "btn btn--primary" %>
+    </div>
+  </div>
+
+  <% if @deals.empty? %>
+    <%= render "deals/empty_state" %>
+  <% else %>
+    <div class="card">
+      <div class="table table--deals table--head">
+        <h2>Contact</h2>
+        <h2>Email</h2>
+        <h2>Stage</h2>
+        <h2>Company</h2>
+        <h2 class="table__numeric">Probability</h2>
+        <h2></h2>
+      </div>
+      <%= render @deals, cta: false %>
+    </div>
+    <%= paginate @deals %>
+  <% end %>
+</main>

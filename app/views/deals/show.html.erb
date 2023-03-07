@@ -1,0 +1,31 @@
+<% content_for :title, "#{@deal.user&.full_name || 'Deal'} — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to deals"), deals_path, class: "breadcrumb" %>
+
+  <div class="header">
+    <div>
+      <h1><%= f_item @deal.user&.full_name %></h1>
+      <p class="header__subtitle">
+        <%= f_item @deal.company&.name %> · <%= @deal.probability %>% probability ·
+        currently <%= stage_badge @deal.current_deal_stage %>
+      </p>
+    </div>
+    <div class="header__actions">
+      <%= link_to "Move stage", new_deal_history_path(@deal), class: "btn btn--primary" %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card__title">Stage history</h2>
+    <div class="table table--history table--head">
+      <h2>Stage</h2>
+      <h2>Recorded</h2>
+    </div>
+    <% @deal_histories.each do |history| %>
+      <div class="table table--history">
+        <p><%= stage_badge history.stage %></p>
+        <p class="table__muted"><%= l history.created_at, format: :long %></p>
+      </div>
+    <% end %>
+  </div>
+</main>
