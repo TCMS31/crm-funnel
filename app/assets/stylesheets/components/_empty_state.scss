@@ -1,0 +1,15 @@
+.empty-state {
+  padding: var(--space-xxl) var(--space-m);
+  border: var(--border);
+  border-style: dashed;
+  border-radius: var(--border-radius);
+  background-color: var(--color-white);
+  text-align: center;
+
+  &__text {
+    font-size: var(--font-size-l);
+    color: var(--color-text-header);
+    margin-bottom: var(--space-l);
+    font-weight: bold;
+  }
+}

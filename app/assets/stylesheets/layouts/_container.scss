@@ -1,0 +1,28 @@
+.container {
+  width: 92%;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-block: var(--space-xl) var(--space-xxxl);
+}
+
+.breadcrumb {
+  display: inline-block;
+  margin-bottom: var(--space-m);
+  font-size: var(--font-size-s);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+
+  &:hover { color: var(--color-primary); }
+}
+
+.section-title {
+  margin: var(--space-xl) 0 var(--space-m);
+  font-size: var(--font-size-xl);
+  color: var(--color-text-header);
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-s);
+}

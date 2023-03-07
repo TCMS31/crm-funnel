@@ -1,0 +1,89 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-m);
+  margin-bottom: var(--space-xl);
+}
+
+.stat {
+  background-color: var(--color-white);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-small);
+  padding: var(--space-m);
+
+  &__label {
+    margin: 0 0 var(--space-xxs);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    margin: 0;
+    font-size: var(--font-size-xxxl);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-header);
+  }
+
+  &__hint {
+    margin: var(--space-xxs) 0 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
+}
+
+.funnel {
+  display: grid;
+  gap: var(--space-s);
+
+  &__row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr 8.5rem;
+    gap: var(--space-m);
+    align-items: center;
+  }
+
+  &__bar {
+    position: relative;
+    height: 2.25rem;
+    border-radius: var(--border-radius);
+    background-color: hsl(220, 30%, 95%);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: var(--border-radius);
+    background-color: var(--color-stage-unstaged);
+    transition: width 200ms ease-out;
+
+    &--lead      { background-color: var(--color-stage-lead); }
+    &--contacted { background-color: var(--color-stage-contacted); }
+    &--diligence { background-color: var(--color-stage-diligence); }
+    &--closed    { background-color: var(--color-stage-closed); }
+    &--rejected  { background-color: var(--color-stage-rejected); }
+  }
+
+  &__count {
+    position: absolute;
+    top: 0;
+    left: var(--space-s);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-header);
+  }
+
+  &__meta {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
