@@ -1,0 +1,33 @@
+<% content_for :title, "#{@user.full_name} — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to contacts"), users_path, class: "breadcrumb" %>
+
+  <div class="header">
+    <div>
+      <h1><%= @user.full_name %></h1>
+      <p class="header__subtitle">
+        <%= @user.email %> · <%= f_item @user.phone_number %> · <%= f_item @user.company&.name %>
+      </p>
+    </div>
+    <div class="header__actions">
+      <%= link_to "Edit contact", edit_user_path(@user), class: "btn btn--light" %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card__title">Deals</h2>
+    <% if @deals.empty? %>
+      <div class="card__body"><p class="muted">This contact has no deals yet.</p></div>
+    <% else %>
+      <div class="table table--deals table--head">
+        <h2>Contact</h2>
+        <h2>Email</h2>
+        <h2>Stage</h2>
+        <h2>Company</h2>
+        <h2 class="table__numeric">Probability</h2>
+        <h2></h2>
+      </div>
+      <%= render @deals, cta: false %>
+    <% end %>
+  </div>
+</main>

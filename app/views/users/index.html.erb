@@ -1,0 +1,33 @@
+<% content_for :title, "Contacts — CRM Funnel" %>
+<main class="container">
+  <%= link_to sanitize("&larr; Back to funnel"), root_path, class: "breadcrumb" %>
+
+  <div class="header">
+    <div>
+      <h1>Contacts</h1>
+      <p class="header__subtitle">
+        <%= number_with_delimiter @users.total_count %> contacts ·
+        page <%= @users.current_page %> of <%= @users.total_pages %>
+      </p>
+    </div>
+    <div class="header__actions">
+      <%= link_to "New contact", new_user_path, class: "btn btn--primary" %>
+    </div>
+  </div>
+
+  <% if @users.empty? %>
+    <%= render "users/empty_state" %>
+  <% else %>
+    <div class="card">
+      <div class="table table--users table--head">
+        <h2>Name</h2>
+        <h2>Email</h2>
+        <h2>Phone</h2>
+        <h2>Company</h2>
+        <h2></h2>
+      </div>
+      <%= render @users %>
+    </div>
+    <%= paginate @users %>
+  <% end %>
+</main>

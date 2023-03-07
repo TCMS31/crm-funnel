@@ -1,0 +1,13 @@
+<%= simple_form_for user, html: { class: "user form" } do |f| %>
+  <%= form_error_notification(user) %>
+  <%= f.input :first_name, input_html: { autofocus: true } %>
+  <%= f.input :last_name %>
+  <%= f.input :email %>
+  <%= f.input :phone_number %>
+  <%= f.association :company, collection: Company.recent.limit(200),
+                    label_method: :name, value_method: :id, include_blank: "—" %>
+  <div class="header__actions">
+    <%= link_to "Cancel", users_path, class: "btn btn--light" %>
+    <%= f.submit class: "btn btn--secondary" %>
+  </div>
+<% end %>
