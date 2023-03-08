@@ -1,0 +1,43 @@
+name: crm-funnel
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${PGUSER:-crm}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-crm}
+      POSTGRES_DB: ${PGDATABASE:-crm_funnel_production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # Host port kept off 5432 so it never collides with a local Postgres.
+      - "8631:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-crm} -d ${PGDATABASE:-crm_funnel_production}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: ${PGUSER:-crm}
+      PGPASSWORD: ${PGPASSWORD:-crm}
+      PGDATABASE: ${PGDATABASE:-crm_funnel_production}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      # Generate with `bin/rails secret`; required in production.
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-change-me-before-deploying}
+    ports:
+      - "8630:3000"
+    command: >
+      sh -c "bundle exec rails db:prepare && bundle exec puma -C config/puma.rb"
+
+volumes:
+  pgdata:

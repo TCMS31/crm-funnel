@@ -1,0 +1,28 @@
+.git
+.github
+.gitignore
+.rubocop.yml
+.env
+.env.*
+!.env.example
+
+# Local state that must never enter the image
+log/*
+tmp/*
+storage/*
+public/assets
+public/packs
+node_modules
+
+# Tests, docs and tooling are not needed at runtime
+spec
+docs
+README.md
+coverage
+
+# Editor / OS noise
+.DS_Store
+**/.DS_Store
+*.swp
+.idea
+.vscode
