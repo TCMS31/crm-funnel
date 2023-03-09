@@ -1,264 +1,263 @@
 # CRM Funnel
 
-A Rails application that turns a flat contact export into a sales funnel. It
-imports contacts, companies and deals from a CSV, records every stage a deal
-passes through as an append-only history, and reports the pipeline by each
-deal's *current* stage.
+A Rails app that turns a flat contact export into a sales pipeline. A deal has no
+stage column: its position is the stage of its newest `deal_histories` row, so the
+funnel is a view over what actually happened rather than a mutable status field.
 
-The dataset it ships with (`crm_data.csv`, 1,000 rows) is a contact export with
-one stage per row; the importer merges repeated contacts, keeps genuine stage
-progressions and rejects rows it cannot trust.
+It ships with the export it was built around — `crm_data.csv`, 1,000 rows, one stage
+per row, 900 distinct e-mail addresses.
 
-## Screenshots
+![The pipeline funnel](docs/screenshots/funnel-dashboard.png)
 
-Captured with Playwright at 1440x900 against the app running locally on the
-seeded dataset (900 deals across 162 companies).
+Every deal is counted once, in one stage, and the five stage counts sum to the deal
+count. The tiles are derived: open is the three non-terminal stages, *expected to
+close* is the sum of open probabilities ÷ 100, and the win rate is won ÷ (won + lost)
+so it does not sag just because the pipeline is growing.
 
-| Funnel dashboard | Deals |
-| --- | --- |
-| ![Funnel dashboard](docs/screenshots/funnel-dashboard.png) | ![Deals index](docs/screenshots/deals-index.png) |
-
-| Stage history for one deal | Contacts |
-| --- | --- |
-| ![Deal stage history](docs/screenshots/deal-stage-history.png) | ![Contacts index](docs/screenshots/contacts-index.png) |
-
-## Architecture
+## The five stages, and what moving between them means
 
 ```mermaid
-flowchart TB
-    Browser["Browser (Turbo + Stimulus)"]
+stateDiagram-v2
+    direction LR
+    [*] --> Lead: POST /deals opens the deal at a starting stage
 
-    subgraph Interface["Interface — app/controllers, app/views"]
-        Dashboard["DashboardController"]
-        Deals["DealsController"]
-        Histories["HistoriesController"]
-        Crud["Users / Companies controllers"]
-    end
+    Lead --> Contacted: POST /deals/:id/histories
+    Contacted --> Diligence
+    Diligence --> Closed
+    Diligence --> Rejected
+    Lead --> Rejected
+    Contacted --> Rejected
+    Closed --> Lead: nothing stops a reopen
 
-    subgraph Domain["Domain — app/services, app/queries"]
-        Import["Crm::ContactImport"]
-        Source["Crm::Import::CsvSource (source seam)"]
-        Row["ContactRow / Contact"]
-        Opener["Crm::DealOpener"]
-        Funnel["Crm::FunnelReport"]
-    end
+    note right of Diligence
+        Lead, Contacted and Diligence are the open stages. A deal is
+        counted in whichever of the five its newest history row names.
+    end note
 
-    subgraph Records["Persistence — app/models"]
-        Deal["Deal"]
-        History["DealHistory (append-only)"]
-        User["User (contact)"]
-        Company["Company"]
-    end
-
-    DB[("PostgreSQL")]
-    CSV["crm_data.csv"]
-
-    Browser --> Dashboard & Deals & Histories & Crud
-    Dashboard --> Funnel
-    Deals --> Opener
-    Histories --> History
-    Crud --> User & Company
-
-    CSV --> Source --> Import
-    Source --> Row --> Import
-    Import --> Deal & History & User & Company
-    Opener --> Deal & History
-    Funnel --> Deal
-
-    Deal & History & User & Company --> DB
+    note right of Closed
+        Closed is the won stage and Rejected the lost one, but neither
+        is enforced as terminal. Every move is an INSERT, so the earlier
+        stages stay on the record.
+    end note
 ```
 
-Dependencies point inward: controllers know about services, services know about
-models, models know nothing above them. `Crm::ContactImport` depends only on a
-source responding to `#each_row`, never on CSV itself.
+Opening a deal is two writes that have to land together — the deal row and its first
+stage entry, because a deal with no history has no position in the funnel — so
+`Crm::DealOpener` commits both in one transaction. After that, `HistoriesController`
+only ever appends: there is no update and no destroy, and a mistake is corrected by
+recording the correct stage on top.
 
-## How a deal moves through the funnel
+Reading the current stage back is the part that costs something. `Deal.with_current_stage`
+attaches it with one `LEFT JOIN LATERAL` over `deal_histories` ordered by
+`created_at DESC, id DESC`, rather than a `deal_histories.last` per row — which also
+means a history row inserted out of order still reports correctly.
+
+![Stage history for one deal](docs/screenshots/deal-stage-history.png)
+
+That deal was walked Lead → Contacted → Diligence through the form while the
+screenshots were being taken, and a second one was moved Contacted → Diligence,
+which is why the dashboard above shows 154 deals in Diligence where a freshly
+imported database has 152.
+
+## Importing the export
+
+```
+$ bin/rails db:seed
+Imported /path/to/crm-funnel/crm_data.csv
+  read 1000 rows -> 900 new contacts, 162 new companies, 900 new deals,
+  900 stage entries (100 duplicate rows merged, 21 probabilities clamped, 0 rows rejected)
+```
+
+The interesting number is 900 deals from 1,000 rows. 100 e-mail addresses appear
+twice in the export, and **e-mail alone is the contact's natural key** — a repeated
+address is the same person, not a second deal, even when the second row leaves
+`company` blank. `Crm::Import::Contact.merge` takes the first non-blank value of each
+field across a contact's rows and the last probability.
+
+Repeated rows collapse only when the stage is unchanged: `Lead, Lead` becomes one
+history entry, `Lead, Contacted` stays two. In this particular export every repeated
+address repeats its stage, which is why the import writes exactly 900 stage entries
+for 900 deals.
+
+Everything else the importer does is visible in that one output line:
+
+- **Probabilities above 100** — 21 rows in the bundle — are clamped to 100 and
+  counted, not silently fixed.
+- **Unusable rows** (blank or malformed e-mail, missing name, unrecognised stage) are
+  rejected with a reason and the run continues. `db:seed` prints the first ten.
+- **A missing column** is different: `CsvSource` raises `MissingHeadersError` rather
+  than importing nothing in silence.
+- **Re-running imports nothing new.** `Contact#stages_after` diffs the file's stages
+  against what the deal already recorded, so a second `db:seed` is a no-op and a
+  source that has moved a deal forward appends only the new stage.
+
+`Crm::ContactImport` never sees a CSV. It depends on a source object with `#each_row`
+yielding `Crm::Import::ContactRow`, so a Hubspot or S3-backed source is one new class
+and nothing else — the merge rule, normalisation, batching and idempotency are all
+independent of where rows come from.
+
+## The tables
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Rep as Sales rep
-    participant C as HistoriesController
-    participant D as Deal
-    participant H as DealHistory
-    participant F as Crm::FunnelReport
-    participant DB as PostgreSQL
+erDiagram
+    COMPANIES ||--o{ USERS : employs
+    COMPANIES ||--o{ DEALS : "is the counterparty for"
+    USERS ||--o{ DEALS : owns
+    DEALS ||--o{ DEAL_HISTORIES : "is staged by"
 
-    Rep->>C: GET /deals/42/histories/new
-    C->>D: Deal.find(42)
-    C-->>Rep: form, pre-filled with the current stage
-
-    Rep->>C: POST /deals/42/histories (stage=Diligence)
-    C->>H: deal.deal_histories.new(stage:)
-    alt stage is a known funnel stage
-        H->>DB: INSERT deal_histories
-        C-->>Rep: 302 to /deals/42 + "Deal moved to Diligence."
-    else unknown stage
-        H-->>C: validation error (no write)
-        C-->>Rep: 422, form re-rendered with the reason
-    end
-
-    Rep->>F: GET /
-    F->>DB: one query, LATERAL join to each deal's latest history
-    DB-->>F: (stage, deal_count, probability_sum) per stage
-    F-->>Rep: every deal counted once, in one stage
+    COMPANIES {
+        bigint id PK
+        string name "unique on lower(name)"
+    }
+    USERS {
+        bigint id PK
+        string email "unique, downcased on write"
+        string first_name
+        string last_name
+        string phone_number
+        bigint company_id FK "nullable"
+    }
+    DEALS {
+        bigint id PK
+        integer probability "0..100, validated"
+        bigint user_id FK "nullable"
+        bigint company_id FK "nullable"
+    }
+    DEAL_HISTORIES {
+        bigint id PK
+        bigint deal_id FK "not null"
+        integer stage "enum Lead Contacted Diligence Closed Rejected"
+        datetime created_at "orders the progression"
+    }
 ```
 
-Nothing is ever overwritten: the deal's earlier stages stay in the table, so the
-funnel is a view over history rather than a mutable status column.
+`User` is a CRM *contact*, not an account — the name comes from the original schema.
+Deleting a company or a contact nullifies the foreign key rather than cascading, so
+funnel history survives the deletion of either side.
 
-## Quickstart
+Three index choices follow directly from the diagram:
+`index_deal_histories_on_deal_and_recency` `(deal_id, created_at, id)` serves the
+latest-history lookup the LATERAL join performs per deal; a descending
+`(created_at, id)` index on deals, users and companies serves the newest-first order
+every index page uses; and the unique index on `lower(companies.name)` makes the
+import's natural key a real constraint instead of a convention.
+
+## Counting deals, not history rows
+
+The obvious pipeline report groups `deal_histories` by stage. That counts a deal once
+per stage it has *ever* been in, so a deal that moved twice appears three times and the
+stage totals exceed the number of deals. `Crm::FunnelReport` resolves each deal's
+latest history row first and aggregates that, so the counts always sum to the deal
+count. A spec builds a pipeline of 6 deals with 8 history rows between them and
+asserts the report still totals 6 (`spec/queries/crm/funnel_report_spec.rb`, "totals to
+the number of deals, not the number of history rows").
+
+Deals with no history at all are reported as their own figure instead of being folded
+into Lead, and an empty pipeline returns zeroes rather than dividing by zero.
+
+## Query budget
+
+Measured here by counting `sql.active_record` notifications on the bundled 1,000-row
+dataset:
+
+| | queries |
+| --- | --- |
+| Import all 1,000 rows | 8 |
+| Deals index, loading one page of 20 | 3 |
+| Whole funnel dashboard report | 1 |
+
+Those are the queries that fetch data. A rendered `GET /deals` adds Kaminari's
+count and an `exists?` check on top of the three, so the whole request is five.
+
+The import is four preloaded lookups and four batched `insert_all`/`upsert_all` calls
+in a single transaction; `ContactRow` validates every row before it goes anywhere near
+the database, which is what makes bypassing ActiveRecord validations safe. Two named
+specs keep this from drifting: `'stays flat instead of growing with the number of
+rows'` caps a 50-row import at fewer than 15 queries, and `'resolves every deal stage
+without a query per row'` asserts exactly 1.
+
+Deals, contacts and companies all paginate (20, 25 and 25 per page), and the
+dashboard's activity list is capped at 8 rows, so no page grows with the table.
+
+![Deals index](docs/screenshots/deals-index.png)
+
+Each row's badge is the stage the LATERAL join returned — 900 deals over 45 pages,
+still three queries to load them.
+
+## Running it locally
+
+Ruby 3.1.3 and a PostgreSQL server are the only prerequisites.
 
 ```bash
-# Ruby 3.1.3 and a PostgreSQL server are the only prerequisites.
 bundle install
-cp .env.example .env          # adjust PGUSER / PGPASSWORD for your machine
-bin/rails db:prepare          # create + load schema
-bin/rails db:seed             # import crm_data.csv (~0.15s, 8 queries)
-bin/rails server              # http://localhost:3000
+cp .env.example .env      # adjust PGUSER / PGPASSWORD for your machine
+bin/rails db:prepare      # create and load schema
+bin/rails db:seed         # import crm_data.csv
+bin/rails server          # http://localhost:3000
 ```
 
-With Docker:
+`GET /up` is a health probe that executes a query, so a process that cannot reach
+Postgres reports `503` instead of accepting traffic it cannot serve.
 
-```bash
-docker compose up --build     # app on http://localhost:8630, Postgres on 8631
-```
+With Docker, `docker compose up --build` puts the app on port 8630 and Postgres on
+8631 (deliberately off 3000 and 5432 so they cannot collide with local services).
+Be aware of what has and has not been checked: `docker compose config` parses, but the
+image has never been built or booted here — the uplift log for this repo records
+`Build verified: NOT RUN — deferred, Docker off` and the same for boot. The Dockerfile
+is multi-stage, runs as a non-root user and healthchecks `/up`, but treat it as
+unproven until you build it.
 
 ## Configuration
 
-All configuration is environment variables; nothing secret is committed.
-`dotenv-rails` loads `.env` in development and test.
+Everything is environment variables and nothing secret is committed. `dotenv-rails`
+loads a local `.env` if there is one.
 
-| Variable | Required | Default | Purpose |
-| --- | --- | --- | --- |
-| `PGHOST` | no | `localhost` | Database host. |
-| `PGPORT` | no | `5432` | Database port. |
-| `PGUSER` | no | *(libpq default: your OS user)* | Database user. |
-| `PGPASSWORD` | no | *(none)* | Database password. |
-| `PGDATABASE` | no | `crm_funnel_development` (dev), `crm_funnel_production` (prod) | Database name. |
-| `PGDATABASE_TEST` | no | `crm_funnel_test` | Database name used by the test suite. |
-| `RAILS_MAX_THREADS` | no | `5` | Puma threads and the ActiveRecord pool size. |
-| `PORT` | no | `3000` | Port Puma binds to. |
-| `SECRET_KEY_BASE` | **yes in production** | *(none)* | Signs cookies. Generate with `bin/rails secret`. |
-| `RAILS_SERVE_STATIC_FILES` | no | unset | Set to any value to let Rails serve `public/`. The Docker image sets it. |
-| `RAILS_LOG_TO_STDOUT` | no | unset | Log to stdout instead of `log/`. The Docker image sets it. |
-| `CRM_IMPORT_CSV` | no | `crm_data.csv` | Path to the export loaded by `db:seed`. |
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `PGHOST` / `PGPORT` | `localhost` / `5432` | Standard libpq variables. |
+| `PGUSER` / `PGPASSWORD` | libpq defaults | One config serves a local install, Compose and a managed database. |
+| `PGDATABASE` | `crm_funnel_development`, `crm_funnel_production` in production | |
+| `PGDATABASE_TEST` | `crm_funnel_test` | Used by the suite. |
+| `RAILS_MAX_THREADS` | `5` | Puma threads and the ActiveRecord pool. |
+| `PORT` | `3000` | Port Puma binds. |
+| `SECRET_KEY_BASE` | none — **required in production** | `bin/rails secret`. |
+| `RAILS_SERVE_STATIC_FILES` | unset | Set to anything to serve `public/`. The image sets it. |
+| `RAILS_LOG_TO_STDOUT` | unset | Log to stdout instead of `log/`. The image sets it. |
+| `CRM_IMPORT_CSV` | `crm_data.csv` | Which export `db:seed` loads. |
 
-## Development
+## Working on it
 
 ```bash
-bundle exec rspec                     # 109 examples
-bundle exec rubocop                   # rubocop + rubocop-rails + rubocop-rspec
-bundle exec rspec spec/services       # just the import
-bin/rails db:seed                     # idempotent: re-running imports nothing new
+bundle exec rspec           # 109 examples, 0 failures
+bundle exec rubocop         # 73 files inspected, no offenses detected
+bundle exec rspec spec/services spec/queries    # just the import and the funnel arithmetic
 CRM_IMPORT_CSV=other.csv bin/rails db:seed
 ```
 
-`GET /up` is a health probe that checks the database and is what the container
-healthcheck calls.
+Both results are from the last run in this checkout. The specs in `spec/requests/`
+render views for real, which is what catches a template error a controller spec would
+sail past.
 
-## Project structure
+Where the work is: `app/services/crm/` (the import, and `deal_opener.rb`),
+`app/queries/crm/funnel_report.rb` (the pipeline aggregation),
+`app/models/deal.rb` (`with_current_stage`, `for_index`) and
+`app/models/deal_history.rb` (the stage enum and its validation). Controllers are
+thin — params in, one service or scope, a template out. `db/seeds.rb` is eight lines
+that call the importer. Styling is hand-written SCSS with no framework.
 
-```
-app/
-  controllers/        Thin: params in, a service or a scope, a template out.
-    health_controller.rb    /up probe used by the Docker healthcheck.
-  models/             Records and their scopes. Deal#current_deal_stage,
-                      Deal.with_current_stage, DealHistory.latest_moves.
-  queries/crm/
-    funnel_report.rb  Pipeline aggregation. One query, every deal counted once.
-  services/crm/
-    contact_import.rb Orchestrates a whole import in one transaction.
-    deal_opener.rb    Deal + its opening stage entry, committed together.
-    import/
-      csv_source.rb   The seam: anything with #each_row can feed the import.
-      contact_row.rb  One inbound row, normalised and validated on its own.
-      contact.rb      All rows for one e-mail, merged into one contact.
-      result.rb       What an import did, returned rather than logged.
-  views/              ERB + simple_form. No business logic.
-  assets/stylesheets/ Hand-written SCSS, BEM-ish, no framework.
-db/
-  migrate/            Schema, including the funnel's supporting indexes.
-  seeds.rb            Ten lines: it just calls the importer.
-spec/
-  requests/           Render views for real; these catch template errors.
-  services/, queries/ Import and funnel arithmetic.
-  models/, controllers/
-docs/screenshots/     Images referenced by this README.
-crm_data.csv          The bundled 1,000-row contact export.
-```
+## What it deliberately does not do
 
-## Design notes
+- **No authentication.** Every visitor can see and change everything. `User` models a
+  contact, not a login.
+- **No stage-transition rules.** Any stage can follow any other, including reopening a
+  Closed deal. The model records what happened rather than policing it — a transition
+  policy would sit next to `Crm::DealOpener`.
+- **No monetary amounts.** Deals carry a probability, not a value, so "expected to
+  close" is a count of deals and not forecast revenue.
+- **Synchronous import.** A thousand rows is fast enough to run inline. A file big
+  enough to matter belongs in a background job.
+- **Probabilities above 100 are clamped, not rejected.** Reported on every run rather
+  than hidden, but it is a product decision someone should confirm.
+- **English only, and no soft deletes.** Flash messages and labels are literals, and a
+  deleted contact or company is gone even though their deals survive.
 
-**The funnel is derived, never stored.** A deal has no `stage` column. Its
-position is the stage of its most recent `deal_histories` row, so a deal that
-moved Lead → Contacted → Diligence still has all three, and the funnel is
-reproducible for any point in time. The cost is that "current stage" is a
-per-deal lookup, which is why it is a `LATERAL` join rather than a Ruby-side
-`deal_histories.last`.
-
-**Counting deals, not history rows.** The obvious pipeline report groups
-`deal_histories` by stage. That counts the same deal once per stage it has ever
-been in — a deal that has moved twice is counted three times and the totals
-exceed the number of deals. `Crm::FunnelReport` resolves each deal's latest
-history row first, then aggregates, so the stage counts always sum to the deal
-count. This is asserted directly in `spec/queries/crm/funnel_report_spec.rb`.
-
-**Where the time actually went.** Two measured bottlenecks, both fixed:
-
-| | before | after |
-| --- | --- | --- |
-| Import 1,000 CSV rows | 8,240 queries, 5.46s | 8 queries, 0.15s |
-| Deals index, one page of 20 | 41 queries | 3 queries |
-
-The import was row-at-a-time `find_or_create_by!`, roughly three round trips per
-line. It is now four preloaded lookups and four batched `insert_all`/`upsert_all`
-calls inside one transaction; `Crm::Import::ContactRow` validates every row
-before it reaches the database, which is what makes skipping ActiveRecord
-validations safe here. The deals index issued one query per deal for the user,
-the company and the stage; it now uses `Deal.for_index` (`includes` plus the
-`LATERAL` join) and is flat in the page size. Both figures come from counting
-`sql.active_record` notifications, and both are pinned by specs so they cannot
-silently regress.
-
-**Indexes match the access patterns.** `index_deal_histories_on_deal_and_recency`
-(`deal_id, created_at, id`) serves the latest-history lookup; `*_on_recency`
-indexes serve the "newest first" ordering every index page uses;
-`index_companies_on_lower_name` makes the import's natural key a real constraint
-instead of a convention.
-
-**Everything is paginated.** Deals, contacts and companies all use Kaminari, and
-the dashboard's activity list is `LIMIT`-ed. No page can grow unbounded with the
-table.
-
-**No `default_scope`.** The models used `default_scope { order(created_at: :desc) }`,
-which silently orders every join, subquery and `pluck`. Ordering is now an
-explicit `.recent` scope applied where it is wanted.
-
-**The one extension seam.** `Crm::ContactImport` depends on a source object with
-`#each_row` yielding `Crm::Import::ContactRow`. `CsvSource` is one
-implementation; a `HubspotSource` or an S3-backed source is a new class and
-nothing else. The import's merge, validation, batching and idempotency logic is
-independent of where rows come from.
-
-**Errors are reported, not swallowed.** The old import called `user.save` and
-ignored the result, so a bad row quietly produced a deal with no contact. Rows
-are now validated up front and an import returns a `Result` listing rejections
-and how many probabilities were clamped, which `db:seed` prints.
-
-## Limitations
-
-- **No authentication or authorisation.** Every visitor is effectively an admin.
-  `User` models a CRM *contact*, not an account.
-- **No stage-transition rules.** Any stage can follow any other, including
-  reopening a Closed deal. The model records what happened rather than policing
-  it; a transition policy would slot in next to `Crm::DealOpener`.
-- **Deals have no monetary amount.** The schema stores a probability, not a
-  value, so "expected to close" is a count of deals, not forecast revenue.
-- **The import is synchronous.** A thousand rows take about 0.15s, so it runs
-  inline. A file large enough to matter belongs in a background job.
-- **Probabilities above 100 are clamped, not rejected.** The bundled export has
-  21 such rows. The count is reported on every import rather than hidden.
-- **Single locale, no i18n.** Flash messages and labels are English literals.
-- **No soft deletes.** Deleting a company or contact detaches their deals
-  (`dependent: :nullify`) so funnel history survives, but the record is gone.
